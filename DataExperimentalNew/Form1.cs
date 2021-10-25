@@ -223,12 +223,11 @@ namespace DataExperimentalNew
             }
             return L;
         }
-        private void density(Func<List<double>> prc, ref System.Windows.Forms.DataVisualization.Charting.Chart chart)
+        private void density(List<double> prc, ref System.Windows.Forms.DataVisualization.Charting.Chart chart)
         {
 
             int M = 20;
-            List<double> x = EmbedRandom();
-            var gist = np.histogram(np.array(x.ToArray()), M);
+            var gist = np.histogram(np.array(prc.ToArray()), M);
             chart.Series[0].Points.Clear();
             for (int i = 0; i < gist.Item1.size; i++)
                 chart.Series[0].Points.AddXY(gist.Item2[i].asscalar<double>(), gist.Item1[i].asscalar<double>());
@@ -404,7 +403,7 @@ namespace DataExperimentalNew
                 textBox21.Text += Y[t].ToString() + " / ";
                 this.chart12.Series[0].Points.AddXY(t, Y[t]);
             }
-            density(() => EmbedRandom(), ref this.chart11);
+            density(EmbedRandom(), ref this.chart11);
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -433,7 +432,7 @@ namespace DataExperimentalNew
             this.chart13.Series[0].Points.Clear();
             for (int i = 0; i < answer5.Count(); i++)
                 this.chart13.Series[0].Points.AddXY(i, answer5[i]);
-            density(() => garmo(), ref this.chart18);
+            density(garmo(), ref this.chart18);
 
         }
 
