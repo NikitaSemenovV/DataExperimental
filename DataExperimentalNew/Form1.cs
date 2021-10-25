@@ -223,19 +223,18 @@ namespace DataExperimentalNew
             }
             return L;
         }
-        private void density()
+        private void density(Func<List<double>> prc, ref System.Windows.Forms.DataVisualization.Charting.Chart chart)
         {
 
             int M = 20;
             List<double> x = EmbedRandom();
             var gist = np.histogram(np.array(x.ToArray()), M);
-            this.chart11.Series[0].Points.Clear();
+            chart.Series[0].Points.Clear();
             for (int i = 0; i < gist.Item1.size; i++)
-                chart11.Series[0].Points.AddXY(gist.Item2[i].asscalar<double>(), gist.Item1[i].asscalar<double>());
+                chart.Series[0].Points.AddXY(gist.Item2[i].asscalar<double>(), gist.Item1[i].asscalar<double>());
         }
         private List<double> garmo()
         {
-            //int cs = 10;
             double N = 1000;
             double A = 5;
             double f = 5;
@@ -270,16 +269,6 @@ namespace DataExperimentalNew
                 y2.Add(y);
             }
             return y2;
-        }
-
-        private void density2()
-        {
-            int M = 20;
-            List<double> x = garmo();
-            var gist = np.histogram(np.array(x.ToArray()), M);
-            this.chart18.Series[0].Points.Clear();
-            for (int i = 0; i < gist.Item1.size; i++)
-                chart18.Series[0].Points.AddXY(gist.Item2[i].asscalar<double>(), gist.Item1[i].asscalar<double>());
         }
         private List<double> aim(List<double> x)
         {
@@ -415,7 +404,7 @@ namespace DataExperimentalNew
                 textBox21.Text += Y[t].ToString() + " / ";
                 this.chart12.Series[0].Points.AddXY(t, Y[t]);
             }
-            density();
+            density(() => EmbedRandom(), ref this.chart11);
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -444,7 +433,7 @@ namespace DataExperimentalNew
             this.chart13.Series[0].Points.Clear();
             for (int i = 0; i < answer5.Count(); i++)
                 this.chart13.Series[0].Points.AddXY(i, answer5[i]);
-            density2();
+            density(() => garmo(), ref this.chart18);
 
         }
 
