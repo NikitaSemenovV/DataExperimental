@@ -18,6 +18,9 @@ namespace DataExperimentalNew
         {
             InitializeComponent();
         }
+        /// <summary>
+        /// Задание 1
+        /// </summary>
         private List<double> Linear(int N, double a, double b)
         {
             List<double> x = new List<double>();
@@ -38,6 +41,9 @@ namespace DataExperimentalNew
             }
             return x;
         }
+        /// <summary>
+        /// Задание 2
+        /// </summary>
         private List<double> EmbedRandom()
         {
             var min = -1;
@@ -72,6 +78,9 @@ namespace DataExperimentalNew
             return lis;
 
         }
+        /// <summary>
+        /// Задание 3
+        /// </summary>
         private void Harmonic()
         {
             List<double> x = EmbedRandom();
@@ -184,6 +193,10 @@ namespace DataExperimentalNew
             }
             return true;
         }
+        
+        /// <summary>
+        /// Задание 4
+        /// </summary>
         private List<double> avtocovariance(List<double> x)
         {
             double avgN = x.Average();
@@ -232,7 +245,11 @@ namespace DataExperimentalNew
             for (int i = 0; i < gist.Item1.size; i++)
                 chart.Series[0].Points.AddXY(gist.Item2[i].asscalar<double>(), gist.Item1[i].asscalar<double>());
         }
-        private List<double> garmo()
+
+        /// <summary>
+        /// Задание 5
+        /// </summary>
+        private List<double> Harm()
         {
             double N = 1000;
             double A = 5;
@@ -249,11 +266,11 @@ namespace DataExperimentalNew
             return y1;
         }
 
-        private List<double> polygarmo()
+        private List<double> polyHarm3()
         {
             double N = 1000;
             double[] A = new double[3] { 10, 100, 15 };
-            double[] f = new double[3] { 4, 37, 134 };
+            double[] f = new double[3] { 15, 37, 134 };
             double dt = 0.001;
             double y = 0;
             List<double> y2 = new List<double>();
@@ -263,13 +280,15 @@ namespace DataExperimentalNew
                 for (int j = 0; j < A.Length; j++)
                 {
                     y = y + A[j] * Math.Sin(2 * Math.PI * f[j] * i);
-
                 }
                 y2.Add(y);
             }
             return y2;
         }
-        private List<double> aim(List<double> x)
+        /// <summary>
+        /// Задание 6
+        /// </summary>
+        private List<double> Shift(List<double> x)
         {
             List<double> x2 = new List<double>();
             int cs = 10;
@@ -284,7 +303,7 @@ namespace DataExperimentalNew
         private List<double> spikes(List<double> lst)
         {
             Random rnd = new Random();
-            int cnt = rnd.Next(1, 10);
+            int cnt = rnd.Next(1, 5);
             for (int x = 0; x < cnt; x++)
             {
                 double tmp = rnd.NextDouble() * (10000.0 - 0.2) + 0.2;
@@ -292,9 +311,12 @@ namespace DataExperimentalNew
             }
             return lst;
         }
+        /// <summary>
+        /// Задание 7
+        /// </summary>
         private List<double> antishift(List<double> x)
         {
-            var tmp = aim(x);
+            var tmp = Shift(x);
             List<double> x2 = new List<double>();
             double average = tmp.Average();
             for (int i = 0; i < x.Count; i++)
@@ -316,12 +338,71 @@ namespace DataExperimentalNew
             }
             return tmp;
         }
+        private List<double> additiveTrRand(List<double> x)
+        {
+            Random rnd = new Random();
+            List<double> x2 = new List<double>();
+            for (int i = 0; i < x.Count; i++)
+            {
+                int value = rnd.Next(30, 324);
+                x[i] += value;
+                x2.Add(x[i]);
+            }
+            return x2;
+        }
+        private List<double> HighlightingTrend(List<double> tmp)
+        {
+            double L = 10;
+            int u = tmp.Count;
+            List<double> y = new List<double>();
+            for (int i = 0; i < tmp.Count - L; i++)
+            {
+                double sum = 0;
+                for (int k = i; k < i + L; k++)
+                {
+                    sum += tmp[k];
+                }
+                y.Add(sum / L);
+            }
+            return y;
+        }
 
+        private List<double> HarmZad3(List<double> x)
+        {
+            int NS=10000;
+            int N = 1000;
+            Random rnd = new Random();
+            
+            for (int k=0; k<NS; k++)
+            {
+                double cnt = rnd.Next(-5, 5);
+                List<double> p = new List<double>();
+                List<double> tmp = EmbedRandom();
+                for (int i=0; i<N;i++)
+                {
+                    p.Add(cnt + tmp[i]); 
+                }
+                for (int i = 0; i <N; i++)
+                {
+                    x[i] += p[i];
+                }
+
+            }
+            for (int i = 0; i <N; i++)
+            {
+                x[i] /= NS;
+            }
+            return x;
+        }
+
+
+        //private List<double> Zad2() Смотри в фкнкции button8_Click
+        //  private List<double> AntiTrend() Смотри в фкнкции button8_Click
         private void button1_Click(object sender, EventArgs e)
         {
             int N = 20;
             double a = 5, b = 3;
-            List<double> answer1 = Linear(N,a,b);
+            List<double> answer1 = Linear(N, a, b);
             N = 20;
             a = -5; b = 3;
             List<double> answer2 = Linear(N, a, b);
@@ -408,31 +489,31 @@ namespace DataExperimentalNew
 
         private void button5_Click(object sender, EventArgs e)
         {
-            List<double> answer1 = garmo();
+            List<double> answer1 = Harm();
             this.chart14.Series[0].Points.Clear();
             for (int i = 0; i < answer1.Count(); i++)
                 this.chart14.Series[0].Points.AddXY(i, answer1[i]);
-            List<double> answer2 = polygarmo();
+            List<double> answer2 = polyHarm3();
             this.chart15.Series[0].Points.Clear();
             for (int i = 0; i < answer2.Count(); i++)
                 this.chart15.Series[0].Points.AddXY(i, answer2[i]);
-            List<double> x = garmo();
+            List<double> x = Harm();
             List<double> answer3 = avtocovariance(x);
             this.chart16.Series[0].Points.Clear();
             for (int i = 0; i < answer3.Count(); i++)
                 this.chart16.Series[0].Points.AddXY(i, answer3[i]);
-            List<double> x1 = garmo();
-            List<double> y = polygarmo();
+            List<double> x1 = Harm();
+            List<double> y = polyHarm3();
             List<double> answer4 = covariance(x1, y);
             this.chart17.Series[0].Points.Clear();
             for (int i = 0; i < answer4.Count(); i++)
                 this.chart17.Series[0].Points.AddXY(i, answer4[i]);
-            List<double> x2 = polygarmo();
+            List<double> x2 = polyHarm3();
             List<double> answer5 = avtocovariance(x2);
             this.chart13.Series[0].Points.Clear();
             for (int i = 0; i < answer5.Count(); i++)
                 this.chart13.Series[0].Points.AddXY(i, answer5[i]);
-            density(garmo(), ref this.chart18);
+            density(Harm(), ref this.chart18);
 
         }
 
@@ -440,8 +521,8 @@ namespace DataExperimentalNew
         {
             this.chart22.Series[0].Points.Clear();
             this.chart21.Series[0].Points.Clear();
-            List<double> x = garmo();
-            var tmp = aim(x);
+            List<double> x = Harm();
+            var tmp = Shift(x);
             for (int i = 0; i < tmp.Count(); i++)
                 this.chart22.Series[0].Points.AddXY(i, tmp[i]);
             tmp = spikes(tmp);
@@ -452,16 +533,42 @@ namespace DataExperimentalNew
         private void button7_Click(object sender, EventArgs e)
         {
             this.chart23.Series[0].Points.Clear();
-            List<double> answer1 = garmo();
+            List<double> answer1 = Harm();
             var tmp = antishift(answer1);
             for (int i = 0; i < tmp.Count(); i++)
                 this.chart23.Series[0].Points.AddXY(i, tmp[i]);
 
             this.chart24.Series[0].Points.Clear();
-            List<double> answer2 = garmo();
+            List<double> answer2 = Harm();
             var tmp2 = antispike(answer2);
             for (int i = 0; i < tmp2.Count(); i++)
                 this.chart24.Series[0].Points.AddXY(i, tmp2[i]);
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            this.chart25.Series[0].Points.Clear();
+            int N = 1000;
+            double a = 4, b = 5;
+            List<double> answer1 = Linear(N, a, b);
+            var tmp = additiveTrRand(answer1);
+            for (int i = 0; i < tmp.Count(); i++)
+                this.chart25.Series[0].Points.AddXY(i, tmp[i]);
+            this.chart26.Series[0].Points.Clear();
+            var tmp2 = HighlightingTrend(answer1);
+            for (int i = 0; i < tmp2.Count(); i++)
+                this.chart26.Series[0].Points.AddXY(i, tmp2[i]);
+            this.chart27.Series[0].Points.Clear();
+            for (int i=0; i<tmp2.Count; i++) // antiTrend
+            {
+                var tmp3 = tmp[i] - tmp2[i];
+                this.chart27.Series[0].Points.AddXY(i, tmp3);
+            }
+            this.chart28.Series[0].Points.Clear();
+            List<double> answer2 = Harm();
+            tmp2 = HarmZad3(answer2);
+            for (int i = 0; i < tmp2.Count(); i++)
+                this.chart28.Series[0].Points.AddXY(i, tmp2[i]);
         }
     }
 }
