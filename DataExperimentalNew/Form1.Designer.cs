@@ -925,7 +925,7 @@
             this.chart21.Location = new System.Drawing.Point(520, 38);
             this.chart21.Name = "chart21";
             series21.ChartArea = "ChartArea1";
-            series21.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series21.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series21.Name = "Series1";
             this.chart21.Series.Add(series21);
             this.chart21.Size = new System.Drawing.Size(648, 461);

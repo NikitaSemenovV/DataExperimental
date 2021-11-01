@@ -291,7 +291,7 @@ namespace DataExperimentalNew
         private List<double> Shift(List<double> x)
         {
             List<double> x2 = new List<double>();
-            int cs = 10;
+            int cs = 0;
             for (int i = 0; i < x.Count; i++)
             {
                 double g = x[i] + cs;
@@ -331,7 +331,7 @@ namespace DataExperimentalNew
             var tmp = spikes(x);
             for (int i = 1; i < tmp.Count - 1; i++)
             {
-                if (Math.Abs(tmp[i] / tmp[i - 1]) > 50)
+                if (Math.Abs(tmp[i] / tmp[i - 1]) > 5)
                     tmp[i] = (tmp[i - 1] + tmp[i + 1]) / 2.0;
                 else
                     tmp[i] = tmp[i];
@@ -367,10 +367,10 @@ namespace DataExperimentalNew
             return y;
         }
 
-        private List<double> HarmZad3(List<double> x)
+        /*private List<double> HarmZad3(List<double> x)
         {
-            int NS=10000;
-            int N = 1000;
+            double N = 1000, start = 0, step = 1, dt=0.001, A=150, f=4, scale=1500;
+            
             Random rnd = new Random();
             
             for (int k=0; k<NS; k++)
@@ -393,7 +393,7 @@ namespace DataExperimentalNew
                 x[i] /= NS;
             }
             return x;
-        }
+        }*/
 
 
         //private List<double> Zad2() Смотри в фкнкции button8_Click
@@ -564,11 +564,11 @@ namespace DataExperimentalNew
                 var tmp3 = tmp[i] - tmp2[i];
                 this.chart27.Series[0].Points.AddXY(i, tmp3);
             }
-            this.chart28.Series[0].Points.Clear();
+           /* this.chart28.Series[0].Points.Clear();
             List<double> answer2 = Harm();
             tmp2 = HarmZad3(answer2);
             for (int i = 0; i < tmp2.Count(); i++)
-                this.chart28.Series[0].Points.AddXY(i, tmp2[i]);
+                this.chart28.Series[0].Points.AddXY(i, tmp2[i]);*/
         }
     }
 }
