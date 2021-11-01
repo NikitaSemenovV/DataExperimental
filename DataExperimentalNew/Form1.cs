@@ -368,6 +368,9 @@ namespace DataExperimentalNew
             }
             return tmp;
         }
+        /// <summary>
+        /// Задание 8
+        /// </summary>
         private List<double> additiveTrRand(List<double> x)
         {
             Random rnd = new Random();
@@ -397,11 +400,11 @@ namespace DataExperimentalNew
             return y;
         }
 
-        private List<double> HarmZad3(List<double> sin)
+        private List<double> HarmZad3(List<double> x)
         {
             List<double> y = Harm2();
-            int inter = 100000;
-            for (int k = 0; k < inter; k++)
+            int inr = 100000;
+            for (int k = 0; k < inr; k++)
             {
                 double[] p = new double[1000];
                 List<double> ran = EmbedRandom2();
@@ -411,16 +414,45 @@ namespace DataExperimentalNew
                 }
                 for (int i = 0; i < 1000; i++)
                 {
-                    sin[i] += p[i];
+                    x[i] += p[i];
                 }
             }
             for (int i = 0; i < 1000; i++)
             {
-                sin[i] /= inter;
+                x[i] /= inr;
             }
-            return sin;
+            return x;
         }
-
+        private void AnalyticalError(List<double> x)
+        {
+            int N = 1000;
+            int k = this.trackBar1.Value;
+            List<double> rand = EmbedRandom();
+            double[] sin = new double[N];
+            for (int i = 0; i < N; i++)
+                sin[i] = x[i] / k;
+            double randSum = 0;
+            double randSinSum = 0;
+            for (int i = 0; i < N; i++)
+            {
+                randSum += rand[i];
+                randSinSum += sin[i];
+            }
+            double randAvg = x.Sum() / N;
+            double randY = 0;
+            double randSinAvg = x.Sum() / N;
+            double randSinY = 0;
+            for (int i = 0; i < N; i++)
+            {
+                randY += (rand[i] - randAvg) * (rand[i] - randAvg);
+                randSinY += (sin[i] - randSinAvg) * (sin[i] - randSinAvg);
+            }
+            randY = Math.Sqrt(randY / N);
+            randSinY = Math.Sqrt(randSinY / N);
+            
+            label1.Text += k + " Стандартное отклонение рандома: " + randY + "\n";
+            label1.Text += k + " Стандартное отклонение ранжома + син: " + randSinY + "\n";
+        }
 
         //private List<double> Zad2() Смотри в фкнкции button8_Click
         //  private List<double> AntiTrend() Смотри в фкнкции button8_Click
@@ -595,6 +627,7 @@ namespace DataExperimentalNew
             tmp2 = HarmZad3(answer2);
             for (int i = 0; i < tmp2.Count(); i++)
                 this.chart29.Series[0].Points.AddXY(i, tmp2[i]);
+            AnalyticalError(answer2);
         }
     }
 }
