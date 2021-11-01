@@ -1047,7 +1047,7 @@
             this.chart29.TabIndex = 17;
             this.chart29.Text = "LinearUpward";
             title25.Name = "Title1";
-            title25.Text = "Задание 3";
+            title25.Text = "Синхронное накпление";
             this.chart29.Titles.Add(title25);
             // 
             // chart28

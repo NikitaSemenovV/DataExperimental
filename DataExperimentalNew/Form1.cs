@@ -59,6 +59,21 @@ namespace DataExperimentalNew
             return lis;
 
         }
+        private List<double> EmbedRandom2()
+        {
+            var min = -5;
+            var max = 5;
+            int N = 10000, S = 5;
+            List<double> lis = new List<double>();
+            Random rnd = new Random();
+            for (double x = 0; x < N; x += 10)
+            {
+                double y = rnd.NextDouble() * (S * max - S * min) + S * min;
+                lis.Add(y);
+            }
+            return lis;
+
+        }
         private List<double> SelfRandom()
         {
             var min = -1;
@@ -253,7 +268,7 @@ namespace DataExperimentalNew
         {
             double N = 1000;
             double A = 5;
-            double f = 5;
+            double f = 6;
             double dt = 0.001;
             double y = 0;
             List<double> y1 = new List<double>();
@@ -265,7 +280,22 @@ namespace DataExperimentalNew
             }
             return y1;
         }
+        private List<double> Harm2()
+        {
+            double N = 1000;
+            double A = 5;
+            double f = 6;
+            double dt = 0.001;
+            double y = 0;
+            List<double> y1 = new List<double>();
+            for (double i = 0; i <= N * dt; i += dt)
+            {
+                y = A * Math.Sin(2 * Math.PI * f * i);
+                y1.Add(y);
 
+            }
+            return y1;
+        }
         private List<double> polyHarm3()
         {
             double N = 1000;
@@ -331,7 +361,7 @@ namespace DataExperimentalNew
             var tmp = spikes(x);
             for (int i = 1; i < tmp.Count - 1; i++)
             {
-                if (Math.Abs(tmp[i] / tmp[i - 1]) > 5)
+                if (Math.Abs(tmp[i] / tmp[i - 1]) > 50)
                     tmp[i] = (tmp[i - 1] + tmp[i + 1]) / 2.0;
                 else
                     tmp[i] = tmp[i];
@@ -367,33 +397,29 @@ namespace DataExperimentalNew
             return y;
         }
 
-        /*private List<double> HarmZad3(List<double> x)
+        private List<double> HarmZad3(List<double> sin)
         {
-            double N = 1000, start = 0, step = 1, dt=0.001, A=150, f=4, scale=1500;
-            
-            Random rnd = new Random();
-            
-            for (int k=0; k<NS; k++)
+            List<double> y = Harm2();
+            int inter = 100000;
+            for (int k = 0; k < inter; k++)
             {
-                double cnt = rnd.Next(-5, 5);
-                List<double> p = new List<double>();
-                List<double> tmp = EmbedRandom();
-                for (int i=0; i<N;i++)
+                double[] p = new double[1000];
+                List<double> ran = EmbedRandom2();
+                for (int i = 0; i < 1000; i++)
                 {
-                    p.Add(cnt + tmp[i]); 
+                    p[i] = y[i] + ran[i];
                 }
-                for (int i = 0; i <N; i++)
+                for (int i = 0; i < 1000; i++)
                 {
-                    x[i] += p[i];
+                    sin[i] += p[i];
                 }
-
             }
-            for (int i = 0; i <N; i++)
+            for (int i = 0; i < 1000; i++)
             {
-                x[i] /= NS;
+                sin[i] /= inter;
             }
-            return x;
-        }*/
+            return sin;
+        }
 
 
         //private List<double> Zad2() Смотри в фкнкции button8_Click
@@ -564,11 +590,11 @@ namespace DataExperimentalNew
                 var tmp3 = tmp[i] - tmp2[i];
                 this.chart27.Series[0].Points.AddXY(i, tmp3);
             }
-           /* this.chart28.Series[0].Points.Clear();
-            List<double> answer2 = Harm();
+            this.chart29.Series[0].Points.Clear();
+            List<double> answer2 = EmbedRandom();
             tmp2 = HarmZad3(answer2);
             for (int i = 0; i < tmp2.Count(); i++)
-                this.chart28.Series[0].Points.AddXY(i, tmp2[i]);*/
+                this.chart29.Series[0].Points.AddXY(i, tmp2[i]);
         }
     }
 }
