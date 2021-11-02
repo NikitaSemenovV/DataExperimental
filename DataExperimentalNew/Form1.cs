@@ -321,7 +321,7 @@ namespace DataExperimentalNew
         private List<double> Shift(List<double> x)
         {
             List<double> x2 = new List<double>();
-            int cs = 0;
+            int cs = 10;
             for (int i = 0; i < x.Count; i++)
             {
                 double g = x[i] + cs;
@@ -451,7 +451,7 @@ namespace DataExperimentalNew
             randSinY = Math.Sqrt(randSinY / N);
             
             label1.Text += k + " Стандартное отклонение рандома: " + randY + "\n";
-            label1.Text += k + " Стандартное отклонение ранжома + син: " + randSinY + "\n";
+            label1.Text += k + " Стандартное отклонение рандома + син: " + randSinY + "\n";
         }
 
         //private List<double> Zad2() Смотри в фкнкции button8_Click
