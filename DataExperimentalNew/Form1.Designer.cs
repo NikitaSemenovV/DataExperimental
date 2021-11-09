@@ -112,6 +112,15 @@
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea28 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series28 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title28 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea29 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series29 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title29 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea30 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series30 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title30 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea31 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series31 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title31 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
@@ -180,6 +189,11 @@
             this.chart26 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chart25 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.button8 = new System.Windows.Forms.Button();
+            this.tabPage9 = new System.Windows.Forms.TabPage();
+            this.button9 = new System.Windows.Forms.Button();
+            this.chart31 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chart30 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chart28 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart4)).BeginInit();
@@ -218,6 +232,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.chart27)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart26)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart25)).BeginInit();
+            this.tabPage9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart31)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chart30)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chart28)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -234,6 +252,7 @@
             this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Controls.Add(this.tabPage7);
             this.tabControl1.Controls.Add(this.tabPage8);
+            this.tabControl1.Controls.Add(this.tabPage9);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -1136,6 +1155,86 @@
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
+            // tabPage9
+            // 
+            this.tabPage9.Controls.Add(this.button9);
+            this.tabPage9.Controls.Add(this.chart31);
+            this.tabPage9.Controls.Add(this.chart30);
+            this.tabPage9.Controls.Add(this.chart28);
+            this.tabPage9.Location = new System.Drawing.Point(4, 22);
+            this.tabPage9.Name = "tabPage9";
+            this.tabPage9.Size = new System.Drawing.Size(1434, 646);
+            this.tabPage9.TabIndex = 8;
+            this.tabPage9.Text = "Задание 9";
+            this.tabPage9.UseVisualStyleBackColor = true;
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(1089, 77);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(193, 74);
+            this.button9.TabIndex = 17;
+            this.button9.Text = "Построить график";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
+            // chart31
+            // 
+            this.chart31.AllowDrop = true;
+            chartArea29.Name = "ChartArea1";
+            this.chart31.ChartAreas.Add(chartArea29);
+            this.chart31.Location = new System.Drawing.Point(23, 326);
+            this.chart31.Name = "chart31";
+            series29.ChartArea = "ChartArea1";
+            series29.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series29.Name = "Series1";
+            this.chart31.Series.Add(series29);
+            this.chart31.Size = new System.Drawing.Size(426, 285);
+            this.chart31.SuppressExceptions = true;
+            this.chart31.TabIndex = 16;
+            this.chart31.Text = "LinearUpward";
+            title29.Name = "Title1";
+            title29.Text = "Преобразование фурье с окном";
+            this.chart31.Titles.Add(title29);
+            // 
+            // chart30
+            // 
+            this.chart30.AllowDrop = true;
+            chartArea30.Name = "ChartArea1";
+            this.chart30.ChartAreas.Add(chartArea30);
+            this.chart30.Location = new System.Drawing.Point(516, 26);
+            this.chart30.Name = "chart30";
+            series30.ChartArea = "ChartArea1";
+            series30.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series30.Name = "Series1";
+            this.chart30.Series.Add(series30);
+            this.chart30.Size = new System.Drawing.Size(517, 363);
+            this.chart30.SuppressExceptions = true;
+            this.chart30.TabIndex = 15;
+            this.chart30.Text = "LinearUpward";
+            title30.Name = "Title1";
+            title30.Text = "Преобразование Фурье";
+            this.chart30.Titles.Add(title30);
+            // 
+            // chart28
+            // 
+            this.chart28.AllowDrop = true;
+            chartArea31.Name = "ChartArea1";
+            this.chart28.ChartAreas.Add(chartArea31);
+            this.chart28.Location = new System.Drawing.Point(23, 26);
+            this.chart28.Name = "chart28";
+            series31.ChartArea = "ChartArea1";
+            series31.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series31.Name = "Series1";
+            this.chart28.Series.Add(series31);
+            this.chart28.Size = new System.Drawing.Size(426, 285);
+            this.chart28.SuppressExceptions = true;
+            this.chart28.TabIndex = 14;
+            this.chart28.Text = "LinearUpward";
+            title31.Name = "Title1";
+            title31.Text = "График";
+            this.chart28.Titles.Add(title31);
+            // 
             // DataExperimentalNew
             // 
             this.AllowDrop = true;
@@ -1186,6 +1285,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.chart27)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart26)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart25)).EndInit();
+            this.tabPage9.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chart31)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chart30)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chart28)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1260,6 +1363,11 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart chart29;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.TabPage tabPage9;
+        private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart31;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart30;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart28;
     }
 }
 

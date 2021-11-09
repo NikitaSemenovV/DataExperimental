@@ -267,12 +267,12 @@ namespace DataExperimentalNew
         private List<double> Harm()
         {
             double N = 1000;
-            double A = 5;
-            double f = 6;
+            double A = 10;
+            double f = 3;
             double dt = 0.001;
             double y = 0;
             List<double> y1 = new List<double>();
-            for (double i = 0; i <= N * dt; i += dt)
+            for (double i = 0; i < N * dt; i += dt)
             {
                 y = A * Math.Sin(2 * Math.PI * f * i);
                 y1.Add(y);
@@ -336,7 +336,7 @@ namespace DataExperimentalNew
             int cnt = rnd.Next(1, 5);
             for (int x = 0; x < cnt; x++)
             {
-                double tmp = rnd.NextDouble() * (10000.0 - 0.2) + 0.2;
+                double tmp = rnd.NextDouble() * (100.0 - 0.2) + 0.2;
                 lst[rnd.Next(0, lst.Count())] = tmp * (rnd.Next(1, 3) == 1 ? 1 : -1);
             }
             return lst;
@@ -456,6 +456,60 @@ namespace DataExperimentalNew
 
         //private List<double> Zad2() Смотри в фкнкции button8_Click
         //  private List<double> AntiTrend() Смотри в фкнкции button8_Click
+
+        private List<double> FourierAmplitude(List<double> x)
+        {
+            int N = x.Count;
+            List<double> x2 = new List<double>();
+            for (int i=0; i<N/2; i++)
+            {
+                double re = 0;
+                double im = 0;
+                for (int j=0; j<N;j++)
+                {
+                    re += x[j] * Math.Cos((2 * Math.PI * i * j) / N);
+                    im += x[j] * Math.Sin((2 * Math.PI * i * j) / N);
+                }
+                re /= N;
+                im /= N;
+                double y = Math.Sqrt(Math.Pow(re, 2) + Math.Pow(im, 2));
+                x2.Add(y);
+            }
+            for(int i=0; i<x2.Count; i++)
+            {
+                Console.WriteLine(x2[i]);
+                Console.ReadLine();
+            }
+            return x2;
+        }
+        private List<double> FourierSpectrum(List<double> x, double window)
+        {
+            int N = x.Count;
+            double wd= ((N - N * window) / 2);
+            List<double> x2 = x.ToList();
+            List<double> x3 = new List<double>();
+            for (int i=0; i<wd; i++)
+            {
+                x2[i] = 0;
+                x2[N - i - 1] = 0;
+            }
+            for (int i = 0; i < N/2 ; i++)
+            {
+                double re = 0;
+                double im = 0;
+                for (int j = 0; j < N; j++)
+                {
+                    re += x2[j] * Math.Cos((2 * Math.PI * i * j) / N);
+                    im += x2[j] * Math.Sin((2 * Math.PI * i * j) / N);
+                }
+                re /= N;
+                im /= N;
+                double y = Math.Sqrt(Math.Pow(re, 2) + Math.Pow(im, 2));
+                x3.Add(y);
+            }
+            return x3;
+
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             int N = 20;
@@ -628,6 +682,29 @@ namespace DataExperimentalNew
             for (int i = 0; i < tmp2.Count(); i++)
                 this.chart29.Series[0].Points.AddXY(i, tmp2[i]);
             AnalyticalError(answer2);
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            this.chart28.Series[0].Points.Clear();
+            List<double> tmp = Harm();
+            for (int i = 1; i < tmp.Count(); i++)
+                this.chart28.Series[0].Points.AddXY(i, tmp[i]);
+            this.chart30.Series[0].Points.Clear();
+            chart30.ChartAreas[0].AxisX.MajorGrid.LineWidth = 0;
+            chart30.ChartAreas[0].AxisY.MajorGrid.LineWidth = 0;
+            var tmp2 = FourierAmplitude(tmp);
+            tmp2 = Shift(tmp2);
+            for (int i = 1; i < tmp2.Count(); i++)
+            {
+                this.chart30.Series[0].Points.AddXY(i, tmp2[i]);
+               // Console.WriteLine(chart30.Series[0].Points[i-1]);
+            }
+            this.chart31.Series[0].Points.Clear();
+            double window = 0.91;
+            var tmp3 = FourierSpectrum(tmp, window);
+            for (int i = 1; i < tmp3.Count(); i++)
+                this.chart31.Series[0].Points.AddXY(i, tmp3[i]);
         }
     }
 }
