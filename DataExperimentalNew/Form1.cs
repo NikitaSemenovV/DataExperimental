@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Numpy;
+using System.IO;
+using NAudio.Wave;
 
 
 namespace DataExperimentalNew
 {
     public partial class DataExperimentalNew : Form
     {
+
+        List<double> wav = new List<double>();
         public DataExperimentalNew()
         {
             InitializeComponent();
@@ -208,7 +208,7 @@ namespace DataExperimentalNew
             }
             return true;
         }
-        
+
         /// <summary>
         /// Задание 4
         /// </summary>
@@ -266,10 +266,10 @@ namespace DataExperimentalNew
         /// </summary>
         private List<double> Harm()
         {
-            double N = 1000;
+            double N = 500;
             double A = 10;
             double f = 3;
-            double dt = 0.001;
+            double dt = 0.002;
             double y = 0;
             List<double> y1 = new List<double>();
             for (double i = 0; i < N * dt; i += dt)
@@ -321,7 +321,7 @@ namespace DataExperimentalNew
         private List<double> Shift(List<double> x)
         {
             List<double> x2 = new List<double>();
-            int cs = 10;
+            int cs = 1;
             for (int i = 0; i < x.Count; i++)
             {
                 double g = x[i] + cs;
@@ -449,7 +449,7 @@ namespace DataExperimentalNew
             }
             randY = Math.Sqrt(randY / N);
             randSinY = Math.Sqrt(randSinY / N);
-            
+
             label1.Text += k + " Стандартное отклонение рандома: " + randY + "\n";
             label1.Text += k + " Стандартное отклонение рандома + син: " + randSinY + "\n";
         }
@@ -461,11 +461,11 @@ namespace DataExperimentalNew
         {
             int N = x.Count;
             List<double> x2 = new List<double>();
-            for (int i=0; i<N/2; i++)
+            for (int i = 0; i < N / 2; i++)
             {
                 double re = 0;
                 double im = 0;
-                for (int j=0; j<N;j++)
+                for (int j = 0; j < N; j++)
                 {
                     re += x[j] * Math.Cos((2 * Math.PI * i * j) / N);
                     im += x[j] * Math.Sin((2 * Math.PI * i * j) / N);
@@ -475,25 +475,25 @@ namespace DataExperimentalNew
                 double y = Math.Sqrt(Math.Pow(re, 2) + Math.Pow(im, 2));
                 x2.Add(y);
             }
-            for(int i=0; i<x2.Count; i++)
-            {
-                Console.WriteLine(x2[i]);
-                Console.ReadLine();
-            }
+            //for (int i = 0; i < x2.Count; i++)
+            //{
+            //    Console.WriteLine(x2[i]);
+            //    Console.ReadLine();
+            //}
             return x2;
         }
         private List<double> FourierSpectrum(List<double> x, double window)
         {
             int N = x.Count;
-            double wd= ((N - N * window) / 2);
+            double wd = ((N - N * window) / 2);
             List<double> x2 = x.ToList();
             List<double> x3 = new List<double>();
-            for (int i=0; i<wd; i++)
+            for (int i = 0; i < wd; i++)
             {
                 x2[i] = 0;
                 x2[N - i - 1] = 0;
             }
-            for (int i = 0; i < N/2 ; i++)
+            for (int i = 0; i < N / 2; i++)
             {
                 double re = 0;
                 double im = 0;
@@ -510,6 +510,50 @@ namespace DataExperimentalNew
             return x3;
 
         }
+        private List<double> LPFPorter(double fc, int m)
+        {
+            double[] d = new double[] { 0.35577019, 0.2436983, 0.07211497, 0.00630165 };
+            double fact = 2.0 * fc;
+            List<double> lpw = new List<double>() { fact };
+            double arg = fact * Math.PI;
+            lpw.AddRange(Enumerable.Range(1, m).Select(i => Math.Sin(arg * i) / (Math.PI * i)));
+            lpw[m] /= 2;
+            double sumg = lpw[0];
+            for (int i = 1; i <= m; i++)
+            {
+                double sum = d[0];
+                arg = Math.PI * i / m;
+                int j = 1;
+                lpw[i] *= d.Skip(1).Aggregate(d[0], (acc, val) => acc + 2.0 * val * Math.Cos(arg * j++));
+                sumg += 2 * lpw[i];
+            }
+            lpw = lpw.Select(v => v / sumg).ToList();
+            return lpw.Skip(1).Reverse().Concat(lpw).ToList();
+        }
+        private List<double> Hpf(double fc, int m)
+        {
+            var lpw = LPFPorter(fc, m);
+            int l = 2 * m + 1;
+            return lpw
+                .Select((v, i) => i == m ? 1 - v : -1 * v)
+                .ToList();
+        }
+
+        private List<double> Bpf(double f1, double f2, int m)
+        {
+            var lpw1 = LPFPorter(f1, m);
+            var lpw2 = LPFPorter(f2, m);
+            return lpw1.Select((v, i) => lpw2[i] - v).ToList();
+        }
+
+
+        private List<double> Bsf(double f1, double f2, int m)
+        {
+            var lpw1 = LPFPorter(f1, m);
+            var lpw2 = LPFPorter(f2, m);
+            return lpw1.Select((v, i) => v - lpw2[i] + (i == m ? 1 : 0)).ToList();
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             int N = 20;
@@ -671,7 +715,7 @@ namespace DataExperimentalNew
             for (int i = 0; i < tmp2.Count(); i++)
                 this.chart26.Series[0].Points.AddXY(i, tmp2[i]);
             this.chart27.Series[0].Points.Clear();
-            for (int i=0; i<tmp2.Count; i++) // antiTrend
+            for (int i = 0; i < tmp2.Count; i++) // antiTrend
             {
                 var tmp3 = tmp[i] - tmp2[i];
                 this.chart27.Series[0].Points.AddXY(i, tmp3);
@@ -686,6 +730,10 @@ namespace DataExperimentalNew
 
         private void button9_Click(object sender, EventArgs e)
         {
+            int N2 = 1000;
+            double dt = 0.002;
+            double dk = 1 / (2 * dt);
+            double df = dk / (N2 / 2);
             this.chart28.Series[0].Points.Clear();
             List<double> tmp = Harm();
             for (int i = 1; i < tmp.Count(); i++)
@@ -694,17 +742,556 @@ namespace DataExperimentalNew
             chart30.ChartAreas[0].AxisX.MajorGrid.LineWidth = 0;
             chart30.ChartAreas[0].AxisY.MajorGrid.LineWidth = 0;
             var tmp2 = FourierAmplitude(tmp);
-            tmp2 = Shift(tmp2);
+            // tmp2 = Shift(tmp2);
             for (int i = 1; i < tmp2.Count(); i++)
             {
-                this.chart30.Series[0].Points.AddXY(i, tmp2[i]);
-               // Console.WriteLine(chart30.Series[0].Points[i-1]);
+                this.chart30.Series[0].Points.AddXY(i * df, tmp2[i]);
+                Console.WriteLine(chart30.Series[0].Points[i - 1]);
             }
             this.chart31.Series[0].Points.Clear();
             double window = 0.91;
             var tmp3 = FourierSpectrum(tmp, window);
             for (int i = 1; i < tmp3.Count(); i++)
-                this.chart31.Series[0].Points.AddXY(i, tmp3[i]);
+                this.chart31.Series[0].Points.AddXY(i * df, tmp3[i]);
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            int N = 1000;
+            int N2 = 1000;
+            float[] p = ReadFile();
+            this.chart32.Series[0].Points.Clear();
+            for (int i = 1; i < p.Count(); i++)
+                this.chart32.Series[0].Points.AddXY(i, p[i]);
+            List<double> lis = p.ToList().Select(x => Convert.ToDouble(x)).ToList();
+            var arr2 = FourierAmplitude(lis);
+            arr2 = Shift(arr2);
+            double dt = 0.02;
+            double dk = 1 / (2 * dt);
+            double df = dk / (N2 / 2);
+            this.chart33.Series[0].Points.Clear();
+            for (int i = 1; i < arr2.Count(); i++)
+            {
+                this.chart33.Series[0].Points.AddXY(i * df, arr2[i]);
+                Console.WriteLine(chart33.Series[0].Points[i - 1]);
+
+            }
+            double window = 0.91;
+            var arr3 = FourierSpectrum(lis, window);
+            this.chart34.Series[0].Points.Clear();
+            for (int i = 1; i < arr3.Count(); i++)
+                this.chart34.Series[0].Points.AddXY(i * df, arr3[i]);
+        }
+
+        private static float[] ReadFile()
+        {
+            string path = @"C:\Users\Nikita\Desktop\Maga 1 sem\Experimental data processing methods\DataExperimental-master\v1x8.dat";
+            byte[] arr = File.ReadAllBytes(path);
+            float[] p = new float[arr.Length / 4];
+            for (int i = 0; i < arr.Length / 4; i++)
+            {
+                p[i] = BitConverter.ToSingle(arr, i * 4);
+            }
+
+            return p;
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            int N = 1000; // количество значений в входном сигнале
+            int M = 200; // количество значений в функции h
+            int start = 1; // начальное значение
+            int step = 1; // шаг по умолчанию
+            double dt = 0.005; // шаг дискретизации
+            double A = 10, f = 4; // амплитуда гармонического процесса, частота
+            // параметры экспоненты
+            double a = 10, b = 1;
+            List<double> x = new List<double>();
+            chart35.Series[0].Points.Clear();
+            for (int i = start; i < N; i += step)
+            {
+                int del = 0;
+                switch (i)
+                {
+                    case 200: del = 120; break;
+                    case 400: del = 130; break;
+                    case 600: del = 110; break;
+                }
+                x.Add(del);
+                chart35.Series[0].Points.AddXY(i, del);
+            }
+
+            List<double> h = new List<double>();
+            chart36.Series[0].Points.Clear();
+            for (double i = start; i < M * dt + 1; i += dt)
+            {
+                // (exp * sin)
+                h.Add((Math.Exp(-a * i) * b) * (A * Math.Sin(2 * Math.PI * f * i)));
+            }
+            double m = h.Max();
+            double j = 0;
+            for (int i = 0; i < h.Count(); i++)
+            {
+                h[i] /= m;
+                chart36.Series[0].Points.AddXY(j, h[i]);
+                j += Math.Round(1.0 / h.Count(), 3);
+            }
+            chart37.Series[0].Points.Clear();
+            List<double> card = new List<double>();
+            for (int i = 0; i < N + M; i++)
+            {
+                double sum = 0;
+                for (int k = 0; k < M; k++)
+                {
+                    if (i - k > 0 && i - k < x.Count())
+                        sum += x[i - k] * h[k];
+                }
+                card.Add(sum);
+            }
+            for (int i = M / 2, l = 1; i < card.Count() - M / 2; i++)
+            {
+                chart37.Series[0].Points.AddXY(l++, card[i]);
+            }
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            double dt = 0.002;
+            int m = 128;
+            this.chart38.Series[0].Points.Clear();
+            List<double> tmp = LPFPorter(10 * dt, m);
+            for (int i = 1; i < tmp.Count(); i++)
+                this.chart38.Series[0].Points.AddXY(i, tmp[i]);
+            this.chart39.Series[0].Points.Clear();
+            tmp = Hpf(90 * dt, m);
+            for (int i = 1; i < tmp.Count(); i++)
+                this.chart39.Series[0].Points.AddXY(i, tmp[i]);
+            this.chart40.Series[0].Points.Clear();
+            tmp = Bpf(10 * dt, 50 * dt, m);
+            for (int i = 1; i < tmp.Count(); i++)
+                this.chart40.Series[0].Points.AddXY(i, tmp[i]);
+            this.chart41.Series[0].Points.Clear();
+            tmp = Bsf(10 * dt, 50 * dt, m);
+            for (int i = 1; i < tmp.Count(); i++)
+                this.chart41.Series[0].Points.AddXY(i, tmp[i]);
+        }
+
+        private List<double> Convolution(List<double> a, List<double> b)
+        {
+            var res = new List<double>();
+            for (int k = 0; k < a.Count + b.Count; k++)
+            {
+                if (k >= a.Count / 2 && k < b.Count + a.Count / 2)
+                {
+                    double sum = 0;
+                    for (int j = 0; j < b.Count; j++)
+                    {
+                        if (k - j < 0)
+                            break;
+                        if (k - j < a.Count)
+                            sum += a[k - j] * b[j];
+                    }
+                    res.Add(sum);
+                }
+            }
+            return res;
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            double dt = 0.002;
+            double m = 128;
+            chart45.Series[0].Points.Clear();
+            List<double> tmp = FourierSpectrum(LPFPorter(10 * dt, (int)m), 1);
+            /// 0, (2m+1)df/2, df
+            /// y[0..len / 2]
+            /// (int)Math.Ceil(((2m+1)df/2) / df)
+            double x = 0.0, df = 1 / ((2 * m + 1) * dt);
+            for (int i = 0; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart45.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+            this.chart44.Series[0].Points.Clear();
+            tmp = FourierSpectrum(Hpf(90 * dt, (int)m), 1);
+            x = 0.0; df = 1 / ((2 * m + 1) * dt);
+            for (int i = 1; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart44.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+            this.chart43.Series[0].Points.Clear();
+            tmp = FourierSpectrum(Bpf(10 * dt, 50 * dt, (int)m), 1);
+            x = 0.0; df = 1 / ((2 * m + 1) * dt);
+            for (int i = 1; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart43.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+            this.chart42.Series[0].Points.Clear();
+            tmp = FourierSpectrum(Bsf(10 * dt, 50 * dt, (int)m), 1);
+            x = 0.0; df = 1 / ((2 * m + 1) * dt);
+            for (int i = 1; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart42.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            var fl = ReadFile().Select(v => Convert.ToDouble(v)).ToList();
+            double dt = 0.002;
+            int m = 128;
+            this.chart49.Series[0].Points.Clear();
+            List<double> tmp = Convolution(fl, LPFPorter(10 * dt, m));
+            double x = 0;
+            for (int i = 0; i < tmp.Count(); i++)
+            {
+                this.chart49.Series[0].Points.AddXY(x, tmp[i]);
+                x += dt;
+            }
+            this.chart48.Series[0].Points.Clear();
+            tmp = Convolution(fl, Hpf(90 * dt, m));
+            x = 0;
+            for (int i = 1; i < tmp.Count(); i++)
+            {
+                this.chart48.Series[0].Points.AddXY(x, tmp[i]);
+                x += dt;
+            }
+            this.chart47.Series[0].Points.Clear();
+            tmp = Convolution(fl, Bpf(10 * dt, 50 * dt, m));
+            x = 0;
+            for (int i = 1; i < tmp.Count(); i++)
+            {
+                this.chart47.Series[0].Points.AddXY(x, tmp[i]);
+                x += dt;
+            }
+            this.chart46.Series[0].Points.Clear();
+            tmp = Convolution(fl, Bsf(10 * dt, 50 * dt, m));
+            x = 0;
+            for (int i = 1; i < tmp.Count(); i++)
+            {
+                this.chart46.Series[0].Points.AddXY(x, tmp[i]);
+                x += dt;
+            }
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            var fl = ReadFile().Select(v => Convert.ToDouble(v)).ToList();
+            double dt = 0.002;
+            double m = 128;
+            chart53.Series[0].Points.Clear();
+            List<double> tmp = FourierSpectrum(Convolution(fl, LPFPorter(10 * dt, (int)m)), 1);
+            /// 0, (2m+1)df/2, df
+            /// y[0..len / 2]
+            /// (int)Math.Ceil(((2m+1)df/2) / df)
+            double x = 0.0, df = 1 / ((2 * m + 1) * dt);
+            for (int i = 0; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart53.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+            this.chart52.Series[0].Points.Clear();
+            tmp = FourierSpectrum(Convolution(fl, Hpf(90 * dt, (int)m)), 1);
+            x = 0.0; df = 1 / ((2 * m + 1) * dt);
+            for (int i = 1; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart52.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+            this.chart51.Series[0].Points.Clear();
+            tmp = FourierSpectrum(Convolution(fl, Bpf(10 * dt, 50 * dt, (int)m)), 1);
+            x = 0.0; df = 1 / ((2 * m + 1) * dt);
+            for (int i = 1; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart51.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+            this.chart50.Series[0].Points.Clear();
+            tmp = FourierSpectrum(Convolution(fl, Bsf(10 * dt, 50 * dt, (int)m)), 1);
+            x = 0.0; df = 1 / ((2 * m + 1) * dt);
+            for (int i = 1; i < (int)((2 * m + 1) / 2); i++)
+            {
+                this.chart50.Series[0].Points.AddXY(x, tmp[i]);
+                x += df;
+            }
+        }
+
+        private static double[] OpenWavFile(string path)
+        {
+            double[] left;
+            double[] right;
+
+            byte[] wav = File.ReadAllBytes(path);
+            int channels = wav[22];
+
+            int pos = 12;
+
+            Func<byte, byte, double> BytesToDouble = (byte firstByte, byte secondByte) => ((short)((secondByte << 8) | firstByte)) / 32768.0;
+
+            while (!(wav[pos] == 100 && wav[pos + 1] == 97 && wav[pos + 2] == 116 && wav[pos + 3] == 97))
+            {
+                pos += 4;
+                int chunkSize = wav[pos] + wav[pos + 1] * 256 + wav[pos + 2] * 65536 + wav[pos + 3] * 16777216;
+                pos += 4 + chunkSize;
+            }
+            pos += 8;
+
+            int samples = (wav.Length - pos) / 2;
+            if (channels == 2) samples /= 2;
+
+            left = new double[samples];
+            if (channels == 2) right = new double[samples];
+            else right = null;
+
+
+            int i = 0;
+            while (pos < wav.Length)
+            {
+                left[i] = BytesToDouble(wav[pos], wav[pos + 1]);
+                pos += 2;
+                if (channels == 2)
+                {
+                    right[i] = BytesToDouble(wav[pos], wav[pos + 1]);
+                    pos += 2;
+                }
+                i++;
+            }
+
+            return left;
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            chart54.Series[0].Points.Clear();
+            chart55.Series[0].Points.Clear();
+            Cursor.Current = Cursors.WaitCursor;
+
+            string path;
+
+            using (OpenFileDialog op = new OpenFileDialog())
+            {
+                if (op.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    path = op.FileName;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            double[] wavNach = OpenWavFile(path);
+            double[] wav = new double[22103];
+            int len = wavNach.Length;
+            for (int i = 0; i < 22103; i++)
+            {
+                wav[i] = wavNach[i + 16000];
+            }
+            for (int i = 0; i < wav.Length; i++)
+            {
+                chart54.Series[0].Points.AddXY(i, wav[i]);
+            }
+            List<double> fur = FourierAmplitude(new List<double>(wav));
+            chart55.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            for (int i = 0; i < fur.Count / 2; i++)
+            {
+                chart55.Series[0].Points.AddXY(i, fur[i]);
+            }
+            wav = wav.Select(i => i * 10).ToArray();
+            float[] floatArray = wav.Select(s => (float)s).ToArray();
+            using (WaveFileWriter writer = new WaveFileWriter("10och.wav", new WaveFormat(22050, 16, 1)))
+            {
+                writer.WriteSamples(floatArray, 0, floatArray.Length);
+            }
+            Cursor.Current = Cursors.Default;
+        }
+
+        private void button17_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            double dt = 1.0 / 22050.0;
+            chart60.Series[0].Points.Clear();
+            chart62.Series[0].Points.Clear();
+            string txt = ((Button)sender).Text;
+            ((Button)sender).Text = "Wait";
+            chart60.Titles[0].Text = "Исходный звук";
+            chart62.Titles[0].Text = "Разложение Фурье";
+
+            string path;
+
+            using (OpenFileDialog op = new OpenFileDialog())
+            {
+                if (op.ShowDialog() == DialogResult.OK)
+                {
+                    path = op.FileName;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            double[] wavNach = OpenWavFile(path);
+            wav = wavNach.ToList();
+            chart60.Series[0].Points.DataBindXY(Enumerable.Range(0, wav.Count).Select(i => i * dt).ToArray(), wav);
+            System.Threading.Thread.Sleep(1000);
+            var fur = FourierAmplitude(wav);
+            chart62.Series[0].Points.DataBindXY(Enumerable.Range(0, 1000).ToArray(), fur.Take(1000).ToArray());
+           
+            Cursor.Current = Cursors.Default;
+            ((Button)sender).Text = txt;
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            int m = 128;
+            double dt = 1.0 / 22050.0;
+            chart60.Series[0].Points.Clear();
+            chart62.Series[0].Points.Clear();
+            chart60.Titles[0].Text = "Основной тон";
+            string txt = ((Button)sender).Text;
+            ((Button)sender).Text = "Wait";
+            System.Threading.Thread.Sleep(1000);
+            var lpf = Convolution(LPFPorter(200.0 * dt, m), wav);
+            float[] floatArray = lpf.Select(s => (float)(s * 5.0)).ToArray();
+            using (WaveFileWriter writer = new WaveFileWriter("Основной.wav", new WaveFormat(22050, 16, 1)))
+            {
+                writer.WriteSamples(floatArray, 0, floatArray.Length);
+            }
+            double time = 0;
+            chart60.Series[0].Points.DataBindXY(Enumerable.Range(0, lpf.Count).Select(i => i * dt).ToArray(), lpf);
+            var fur = FourierAmplitude(lpf);
+            chart62.Series[0].Points.DataBindXY(Enumerable.Range(0, 1000).ToArray(), fur.Take(1000).ToArray());
+
+            Cursor.Current = Cursors.Default;
+            ((Button)sender).Text = txt;
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            int m = 128;
+            double dt = 1.0 / 22050.0;
+            chart60.Series[0].Points.Clear();
+            chart62.Series[0].Points.Clear();
+            string txt = ((Button)sender).Text;
+            ((Button)sender).Text = "Wait";
+            System.Threading.Thread.Sleep(1000);
+            var bpf = Convolution(Bpf(250.0 * dt, 350.0 * dt, m), wav);
+            double time = 0;
+            for (int i = 0; i < bpf.Count; i++)
+            {
+                chart60.Series[0].Points.AddXY(time, bpf[i]);
+                time += dt;
+            }
+            float[] floatArray = bpf.Select(s => (float)(s * 5.0)).ToArray();
+            using (WaveFileWriter writer = new WaveFileWriter("1for.wav", new WaveFormat(22050, 16, 1)))
+            {
+                writer.WriteSamples(floatArray, 0, floatArray.Length);
+            }
+            var fur = FourierAmplitude(bpf);
+            for (int i = 0; i < fur.Count / 2 && i < 1000; i++)
+            {
+                chart62.Series[0].Points.AddXY(i, fur[i]);
+            }
+            Cursor.Current = Cursors.Default;
+            ((Button)sender).Text = txt;
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            int m = 128;
+            double dt = 1.0 / 22050.0;
+            chart60.Series[0].Points.Clear();
+            chart62.Series[0].Points.Clear();
+            string txt = ((Button)sender).Text;
+            ((Button)sender).Text = "Wait";
+            System.Threading.Thread.Sleep(1000);
+            var bpf = Convolution(Bpf(450 * dt, 600 * dt, m), wav);
+            double time = 0;
+            for (int i = 0; i < bpf.Count; i++)
+            {
+                chart60.Series[0].Points.AddXY(time, bpf[i]);
+                time += dt;
+            }
+            float[] floatArray = bpf.Select(s => (float)(s * 10.0)).ToArray();
+            using (WaveFileWriter writer = new WaveFileWriter("2for.wav", new WaveFormat(22050, 16, 1)))
+            {
+                writer.WriteSamples(floatArray, 0, floatArray.Length);
+            }
+            var fur = FourierAmplitude(bpf);
+            for (int i = 0; i < fur.Count / 2 && i < 1000; i++)
+            {
+                chart62.Series[0].Points.AddXY(i, fur[i]);
+            }
+            Cursor.Current = Cursors.Default;
+            ((Button)sender).Text = txt;
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            int m = 128;
+            double dt = 1.0 / 22050.0;
+            chart60.Series[0].Points.Clear();
+            chart62.Series[0].Points.Clear();
+            string txt = ((Button)sender).Text;
+            ((Button)sender).Text = "Wait";
+            System.Threading.Thread.Sleep(1000);
+            var bpf = Convolution(Bpf(650 * dt, 750 * dt, m), wav);
+            double time = 0;
+            for (int i = 0; i < bpf.Count; i++)
+            {
+                chart60.Series[0].Points.AddXY(time, bpf[i]);
+                time += dt;
+            }
+            float[] floatArray = bpf.Select(s => (float)(s * 20.0)).ToArray();
+            using (WaveFileWriter writer = new WaveFileWriter("3for.wav", new WaveFormat(22050, 16, 1)))
+            {
+                writer.WriteSamples(floatArray, 0, floatArray.Length);
+            }
+            var fur = FourierAmplitude(bpf);
+            for (int i = 0; i < fur.Count / 2 && i < 1000; i++)
+            {
+                chart62.Series[0].Points.AddXY(i, fur[i]);
+            }
+            Cursor.Current = Cursors.Default;
+            ((Button)sender).Text = txt;
+        }
+
+        private void button23_Click(object sender, EventArgs e)
+        {
+            int m = 128;
+            double dt = 1.0 / 22050.0;
+            chart60.Series[0].Points.Clear();
+            chart62.Series[0].Points.Clear();
+            string txt = ((Button)sender).Text;
+            ((Button)sender).Text = "Wait";
+            System.Threading.Thread.Sleep(1000);
+            var bpf = Convolution(Bpf(800 * dt, 900 * dt, m), wav);
+            double time = 0;
+            for (int i = 0; i < bpf.Count; i++)
+            {
+                chart60.Series[0].Points.AddXY(time, bpf[i]);
+                time += dt;
+            }
+            float[] floatArray = bpf.Select(s => (float)(s * 100.0)).ToArray();
+            using (WaveFileWriter writer = new WaveFileWriter("4for.wav", new WaveFormat(22050, 16, 1)))
+            {
+                writer.WriteSamples(floatArray, 0, floatArray.Length);
+            }
+            var fur = FourierAmplitude(bpf);
+            for (int i = 0; i < fur.Count / 2 && i < 1000; i++)
+            {
+                chart62.Series[0].Points.AddXY(i, fur[i]);
+            }
+            Cursor.Current = Cursors.Default;
+            ((Button)sender).Text = txt;
         }
     }
 }
